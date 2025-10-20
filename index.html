@@ -9,10 +9,13 @@
 <body>
   <h1>Control de Faltas</h1>
 
-  <div class="formulario">
+  <div class="formulario" id="loginDiv">
+    <button id="btnLogin">Iniciar sesión con Google</button>
+  </div>
+
+  <div class="formulario" id="appDiv" style="display:none;">
     <label for="fechaFalta">Selecciona una fecha:</label>
     <input type="date" id="fechaFalta" onchange="mostrarAsignaturasDelDia()">
-
     <div id="asignaturasDelDia"></div>
 
     <div class="botonera">
@@ -30,15 +33,15 @@
         <input type="file" accept=".txt" onchange="importarFaltasDesdeTxt(event)" class="hidden-file-input">
       </label>
     </div>
-  </div>
 
-  <h2>Resumen de Faltas</h2>
-  <table>
-    <thead>
-      <tr><th>Asignatura</th><th>Faltas</th><th>Máximo</th><th>Restantes</th></tr>
-    </thead>
-    <tbody id="tablaResumen"></tbody>
-  </table>
+    <h2>Resumen de Faltas</h2>
+    <table>
+      <thead>
+        <tr><th>Asignatura</th><th>Faltas</th><th>Máximo</th><th>Restantes</th></tr>
+      </thead>
+      <tbody id="tablaResumen"></tbody>
+    </table>
+  </div>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
