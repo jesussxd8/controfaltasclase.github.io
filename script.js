@@ -17,19 +17,21 @@ const maxFaltas = {
   ADD: 41
 };
 
-// Faltas iniciales proporcionadas por el usuario
-let faltas = {
-  SRD: 2,
-  SGY: 5,
-  SSG: 4,
-  IMW: 4,
-  ADE: 2,
-  IPW: 13,
-  SOJ: 1,
-  ADD: 7
-};
-
-localStorage.setItem("faltas", JSON.stringify(faltas));
+// Solo establecer faltas iniciales si no hay datos en localStorage
+let faltas = JSON.parse(localStorage.getItem("faltas"));
+if (!faltas) {
+  faltas = {
+    SRD: 2,
+    SGY: 5,
+    SSG: 4,
+    IMW: 4,
+    ADE: 2,
+    IPW: 13,
+    SOJ: 1,
+    ADD: 7
+  };
+  localStorage.setItem("faltas", JSON.stringify(faltas));
+}
 
 function mostrarAsignaturasDelDia() {
   const fecha = document.getElementById("fechaFalta").value;
@@ -106,8 +108,6 @@ function reiniciarFaltas() {
   }
 }
 
-actualizarTabla();
-
 function exportarFaltas() {
   const datos = JSON.stringify(faltas, null, 2);
   const blob = new Blob([datos], { type: "application/json" });
@@ -144,3 +144,5 @@ function importarFaltas(event) {
   };
   lector.readAsText(archivo);
 }
+
+actualizarTabla();
