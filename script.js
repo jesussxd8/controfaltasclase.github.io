@@ -1,3 +1,18 @@
+// Configuración Firebase personalizada del usuario
+const firebaseConfig = {
+  apiKey: "AIzaSyCw-vPulec3ToBUzSV3N_7M4t4tGyzgAgM",
+  authDomain: "controlfaltasclase.firebaseapp.com",
+  projectId: "controlfaltasclase",
+  storageBucket: "controlfaltasclase.firebasestorage.app",
+  messagingSenderId: "874486434099",
+  appId: "1:874486434099:web:778b916b3a17ad1b349646",
+  measurementId: "G-X864VDXE06"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 const horario = {
   "Monday": { SRD: 1, SGY: 2, SSG: 1, IMW: 2 },
   "Tuesday": { SRD: 2, SGY: 1, ADE: 1, IPW: 2 },
@@ -17,20 +32,46 @@ const maxFaltas = {
   ADD: 41
 };
 
-// Solo establecer faltas iniciales si no hay datos en localStorage
-let faltas = JSON.parse(localStorage.getItem("faltas"));
-if (!faltas) {
-  faltas = {
-    SRD: 2,
-    SGY: 5,
-    SSG: 4,
-    IMW: 4,
-    ADE: 2,
-    IPW: 13,
-    SOJ: 1,
-    ADD: 7
-  };
-  localStorage.setItem("faltas", JSON.stringify(faltas));
+let faltas = {};
+
+const btnLogin = document.getElementById("btnLogin");
+const loginDiv = document.getElementById("loginDiv");
+const appDiv = document.getElementById("appDiv");
+
+btnLogin.onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(result => {
+      const user = result.user;
+      iniciarParaUsuario(user.uid);
+    })
+    .catch(error => {
+      console.error(error);
+      alert("Error en login.");
+    });
+};
+
+function iniciarParaUsuario(uid) {
+  loginDiv.style.display = "none";
+  appDiv.style.display = "block";
+
+  const docRef = db.collection("usuarios").doc(uid);
+  docRef.get().then(doc => {
+    if (doc.exists) {
+      faltas = doc.data().faltas || {};
+    } else {
+      faltas = {
+        SRD: 2, SGY: 5, SSG: 4, IMW: 4,
+        ADE: 2, IPW: 13, SOJ: 1, ADD: 7
+      };
+      docRef.set({ faltas });
+    }
+    actualizarTabla();
+  }).catch(error => {
+    console.error(error);
+    alert("Error al cargar datos.");
+    actualizarTabla();
+  });
 }
 
 function mostrarAsignaturasDelDia() {
@@ -75,9 +116,16 @@ function registrarFaltas() {
     }
   });
 
-  localStorage.setItem("faltas", JSON.stringify(faltas));
-  actualizarTabla();
-  mostrarAsignaturasDelDia();
+  const uid = auth.currentUser.uid;
+  db.collection("usuarios").doc(uid).set({ faltas })
+    .then(() => {
+      actualizarTabla();
+      mostrarAsignaturasDelDia();
+    })
+    .catch(error => {
+      console.error("Error guardando faltas:", error);
+      alert("Error al guardar datos.");
+    });
 }
 
 function actualizarTabla() {
@@ -102,9 +150,16 @@ function actualizarTabla() {
 function reiniciarFaltas() {
   if (confirm("¿Seguro que quieres borrar todas las faltas registradas?")) {
     faltas = {};
-    localStorage.removeItem("faltas");
-    actualizarTabla();
-    mostrarAsignaturasDelDia();
+    const uid = auth.currentUser.uid;
+    db.collection("usuarios").doc(uid).set({ faltas })
+      .then(() => {
+        actualizarTabla();
+        mostrarAsignaturasDelDia();
+      })
+      .catch(error => {
+        console.error("Error al reiniciar:", error);
+        alert("Error al reiniciar datos.");
+      });
   }
 }
 
@@ -131,10 +186,17 @@ function importarFaltas(event) {
       const datosImportados = JSON.parse(e.target.result);
       if (typeof datosImportados === "object") {
         faltas = datosImportados;
-        localStorage.setItem("faltas", JSON.stringify(faltas));
-        actualizarTabla();
-        mostrarAsignaturasDelDia();
-        alert("Faltas importadas correctamente.");
+        const uid = auth.currentUser.uid;
+        db.collection("usuarios").doc(uid).set({ faltas })
+          .then(() => {
+            actualizarTabla();
+            mostrarAsignaturasDelDia();
+            alert("Faltas importadas correctamente.");
+          })
+          .catch(error => {
+            console.error("Error al importar faltas:", error);
+            alert("Error al guardar datos importados.");
+          });
       } else {
         throw new Error("Formato incorrecto.");
       }
@@ -144,5 +206,3 @@ function importarFaltas(event) {
   };
   lector.readAsText(archivo);
 }
-
-actualizarTabla();
