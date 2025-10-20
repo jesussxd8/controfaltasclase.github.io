@@ -14,6 +14,10 @@
 
   <div class="formulario" id="appDiv" style="display:none;">
     <label for="fechaFalta">Selecciona una fecha:</label>
+    <label style="margin-left: 10px;">
+      Importar .TXT:
+      <input type="file" accept=".txt" onchange="importarFaltasDesdeTxt(event)">
+    </label>
     <input type="date" id="fechaFalta" onchange="mostrarAsignaturasDelDia()">
     <div id="asignaturasDelDia"></div>
     <button onclick="registrarFaltas()">Registrar faltas seleccionadas</button>
@@ -22,6 +26,10 @@
     <label style="margin-left: 10px;">
       Importar:
       <input type="file" accept=".json" onchange="importarFaltas(event)">
+    </label>
+    <label style="margin-left: 10px;">
+      Importar .TXT:
+      <input type="file" accept=".txt" onchange="importarFaltasDesdeTxt(event)">
     </label>
     <h2>Resumen de Faltas</h2>
     <table>

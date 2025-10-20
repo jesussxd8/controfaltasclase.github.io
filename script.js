@@ -206,3 +206,43 @@ function importarFaltas(event) {
   };
   lector.readAsText(archivo);
 }
+
+
+// Función para importar faltas desde archivo TXT (estructura tipo SRD: 2)
+function importarFaltasDesdeTxt(event) {
+  const archivo = event.target.files[0];
+  if (!archivo) return;
+
+  const lector = new FileReader();
+  lector.onload = function(e) {
+    const contenido = e.target.result;
+    const lineas = contenido.split(/\r?\n/);
+    const faltasImportadas = {};
+
+    for (let linea of lineas) {
+      const [asignatura, valor] = linea.split(":").map(s => s.trim());
+      if (asignatura && valor && !isNaN(parseInt(valor))) {
+        faltasImportadas[asignatura] = parseInt(valor);
+      }
+    }
+
+    if (Object.keys(faltasImportadas).length > 0) {
+      faltas = { ...faltas, ...faltasImportadas };
+      const uid = auth.currentUser.uid;
+      db.collection("usuarios").doc(uid).set({ faltas })
+        .then(() => {
+          actualizarTabla();
+          mostrarAsignaturasDelDia();
+          alert("Faltas importadas desde archivo .txt correctamente.");
+        })
+        .catch(error => {
+          console.error("Error al guardar datos importados:", error);
+          alert("Error al guardar datos importados.");
+        });
+    } else {
+      alert("El archivo no contiene una estructura válida.");
+    }
+  };
+
+  lector.readAsText(archivo);
+}
