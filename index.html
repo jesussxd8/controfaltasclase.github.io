@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Control de Faltas Detallado</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Control de Faltas por Clase</h1>
+
+  <div class="formulario">
+    <label for="fechaFalta">Selecciona una fecha:</label>
+    <input type="date" id="fechaFalta" onchange="mostrarAsignaturasDelDia()">
+    <div id="asignaturasDelDia"></div>
+    <button onclick="registrarFaltas()">Registrar faltas seleccionadas</button>
+    <button onclick="reiniciarFaltas()">Reiniciar todas las faltas</button>
+<button onclick="exportarFaltas()">Exportar faltas</button>
+<label style="margin-left: 10px;">
+  Importar:
+  <input type="file" accept=".json" onchange="importarFaltas(event)">
+</label>
+  </div>
+
+  <h2>Resumen de Faltas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Asignatura</th>
+        <th>Faltas</th>
+        <th>Máximo</th>
+        <th>Restantes</th>
+      </tr>
+    </thead>
+    <tbody id="tablaResumen"></tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+</html>

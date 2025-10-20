@@ -1,0 +1,46 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  background: #f4f4f4;
+  color: #333;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+.formulario {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+input[type="date"] {
+  padding: 8px;
+  margin: 10px 0;
+}
+
+button {
+  padding: 8px 12px;
+  margin: 10px 5px;
+  cursor: pointer;
+}
+
+table {
+  margin: auto;
+  border-collapse: collapse;
+  width: 80%;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+#asignaturasDelDia {
+  margin: 15px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
