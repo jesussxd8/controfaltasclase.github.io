@@ -1,53 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control de Faltas</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="assets/logo.svg" />
+  <script src="libs/chart.min.js"></script>
+  <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <h1>Control de Faltas</h1>
+  <header>
+    <h1>📚 Control de Faltas</h1>
+    <button id="btnLogout" class="oculto">Cerrar sesión</button>
+  </header>
 
-  <div class="formulario" id="loginDiv">
-    <button id="btnLogin">Iniciar sesión con Google</button>
-  </div>
+  <main>
+    <!-- Login -->
+    <section id="loginSection" class="card centrado">
+      <h2>Bienvenido</h2>
+      <p>Inicia sesión con tu cuenta de Google para continuar</p>
+      <button id="btnLogin" class="btn-primary">Iniciar sesión con Google</button>
+    </section>
 
-  <div class="formulario" id="appDiv" style="display:none;">
-    <label for="fechaFalta">Selecciona una fecha:</label>
-    <input type="date" id="fechaFalta" onchange="mostrarAsignaturasDelDia()">
-    <div id="asignaturasDelDia"></div>
+    <!-- App principal -->
+    <section id="appSection" class="card oculto">
+      <div class="form-control centrado">
+        <label for="fechaFalta">Selecciona una fecha:</label>
+        <input type="date" id="fechaFalta" />
+      </div>
 
-    <div class="botonera">
-      <button onclick="registrarFaltas()">Registrar faltas seleccionadas</button>
-      <button onclick="reiniciarFaltas()">Reiniciar todas las faltas</button>
-      <button onclick="exportarFaltas()">📤 Exportar faltas</button>
+      <div id="asignaturasDelDia" class="centrado"></div>
 
-      <label class="custom-file-button">
-        📥 Importar JSON
-        <input type="file" accept=".json" onchange="importarFaltas(event)" class="hidden-file-input">
-      </label>
+      <div class="botonera">
+        <button id="btnRegistrar" class="btn-primary">Registrar faltas</button>
+        <button id="btnReiniciar" class="btn-secondary">Reiniciar</button>
+        <button id="btnExportar" class="btn-accent">📤 Exportar</button>
 
-      <label class="custom-file-button">
-        📥 Importar .TXT
-        <input type="file" accept=".txt" onchange="importarFaltasDesdeTxt(event)" class="hidden-file-input">
-      </label>
-    </div>
+        <label class="custom-file-button">
+          📥 Importar JSON
+          <input type="file" id="inputImportJson" accept=".json" class="hidden-file-input" />
+        </label>
 
-    <h2>Resumen de Faltas</h2>
-    <div class="tabla-contenedor"><table>
-      <thead>
-        <tr><th>Asignatura</th><th>Faltas</th><th>Máximo</th><th>Restantes</th></tr>
-      </thead>
-      <tbody id="tablaResumen"></tbody>
-    </table></div>
-  </div>
+        <label class="custom-file-button">
+          📥 Importar TXT
+          <input type="file" id="inputImportTxt" accept=".txt" class="hidden-file-input" />
+        </label>
+      </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+      <h2 class="centrado">Resumen de Faltas</h2>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Asignatura</th>
+              <th>Faltas</th>
+              <th>Máximo</th>
+              <th>Restantes</th>
+            </tr>
+          </thead>
+          <tbody id="tablaResumen"></tbody>
+        </table>
+      </div>
 
-  <script src="script.js"></script>
+      <div class="grafico-container">
+        <canvas id="graficoFaltas"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <footer>
+    <p>Hecho con ❤️ y Firebase — 2025</p>
+  </footer>
 </body>
 </html>
