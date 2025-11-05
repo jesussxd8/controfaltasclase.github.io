@@ -3,43 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Control de Faltas Pro</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="js/main.js" defer></script>
+  <title>Control de Faltas</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="assets/logo.svg" />
+  <script src="libs/chart.min.js"></script>
+  <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <div id="loader" class="loader"><div class="spinner"></div></div>
+  <!-- Loader -->
+  <div id="loader" class="loader">
+    <div class="spinner"></div>
+  </div>
 
-  <aside class="sidebar">
-    <h2>⚙️ Panel</h2>
-    <nav>
-      <button id="btnDashboard" class="active">📊 Dashboard</button>
-      <button id="btnHistorial">🕓 Historial</button>
-      <button id="btnLogout">🚪 Cerrar Sesión</button>
-      <button id="toggleTheme" class="theme-toggle">☀️/🌙</button>
-    </nav>
-  </aside>
+  <header>
+    <h1>📚 Control de Faltas</h1>
+    <div class="header-buttons">
+      <button id="toggleTheme" title="Cambiar tema">🌙</button>
+      <button id="btnLogout" class="oculto">Cerrar sesión</button>
+    </div>
+  </header>
 
-  <main class="main">
+  <main>
+    <!-- Login -->
     <section id="loginSection" class="card centrado">
-      <h1>Bienvenido a Control de Faltas Pro</h1>
-      <p>Inicia sesión con Google para acceder a tu panel</p>
+      <h2>Bienvenido</h2>
+      <p>Inicia sesión con tu cuenta de Google para continuar</p>
       <button id="btnLogin" class="btn-primary">Iniciar sesión con Google</button>
     </section>
 
-    <section id="appSection" class="dashboard oculto">
-      <h1>📊 Resumen General</h1>
-      <div id="cardsContainer" class="cards"></div>
-
-      <div class="chart-container">
-        <canvas id="graficoFaltas"></canvas>
+    <!-- App principal -->
+    <section id="appSection" class="card oculto">
+      <div class="form-control centrado">
+        <label for="fechaFalta">Selecciona una fecha:</label>
+        <input type="date" id="fechaFalta" />
       </div>
 
-      <div id="historialContainer" class="historial"></div>
+      <div id="asignaturasDelDia" class="centrado"></div>
+
+      <div class="botonera">
+        <button id="btnRegistrar" class="btn-primary">Registrar faltas</button>
+        <button id="btnReiniciar" class="btn-secondary">Reiniciar</button>
+        <button id="btnExportar" class="btn-accent">📤 Exportar</button>
+
+        <label class="custom-file-button">
+          📥 Importar JSON
+          <input type="file" id="inputImportJson" accept=".json" class="hidden-file-input" />
+        </label>
+
+        <label class="custom-file-button">
+          📥 Importar TXT
+          <input type="file" id="inputImportTxt" accept=".txt" class="hidden-file-input" />
+        </label>
+      </div>
+
+      <h2 class="centrado">Resumen de Faltas</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Asignatura</th>
+              <th>Faltas</th>
+              <th>Máximo</th>
+              <th>Restantes</th>
+            </tr>
+          </thead>
+          <tbody id="tablaResumen"></tbody>
+        </table>
+      </div>
+
+      <div class="grafico-container">
+        <canvas id="graficoFaltas"></canvas>
+      </div>
     </section>
   </main>
 
   <div id="toast" class="toast"></div>
+
+  <footer>
+    <p>Hecho con ❤️ y Firebase — 2025</p>
+  </footer>
 </body>
 </html>
