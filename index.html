@@ -5,15 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control de Faltas</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="assets/logo.svg" />
-  <script src="libs/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <!-- Loader -->
-  <div id="loader" class="loader">
-    <div class="spinner"></div>
-  </div>
+  <div id="loader" class="loader"><div class="spinner"></div></div>
 
   <header>
     <h1>📚 Control de Faltas</h1>
@@ -24,14 +20,12 @@
   </header>
 
   <main>
-    <!-- Login -->
     <section id="loginSection" class="card centrado">
       <h2>Bienvenido</h2>
       <p>Inicia sesión con tu cuenta de Google para continuar</p>
       <button id="btnLogin" class="btn-primary">Iniciar sesión con Google</button>
     </section>
 
-    <!-- App principal -->
     <section id="appSection" class="card oculto">
       <div class="form-control centrado">
         <label for="fechaFalta">Selecciona una fecha:</label>
@@ -74,13 +68,13 @@
       <div class="grafico-container">
         <canvas id="graficoFaltas"></canvas>
       </div>
+
+      <h2 class="centrado">📅 Historial de Faltas</h2>
+      <div id="historialContainer" class="historial"></div>
     </section>
   </main>
 
   <div id="toast" class="toast"></div>
-
-  <footer>
-    <p>Hecho con ❤️ y Firebase — 2025</p>
-  </footer>
+  <footer><p>Hecho con ❤️ y Firebase — 2025</p></footer>
 </body>
 </html>
