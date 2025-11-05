@@ -9,7 +9,10 @@
   <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <div id="loader" class="loader"><div class="spinner"></div></div>
+  <!-- Loader -->
+  <div id="loader" class="loader">
+    <div class="spinner"></div>
+  </div>
 
   <header>
     <h1>📚 Control de Faltas</h1>
@@ -20,12 +23,14 @@
   </header>
 
   <main>
+    <!-- Login -->
     <section id="loginSection" class="card centrado">
       <h2>Bienvenido</h2>
       <p>Inicia sesión con tu cuenta de Google para continuar</p>
       <button id="btnLogin" class="btn-primary">Iniciar sesión con Google</button>
     </section>
 
+    <!-- App principal -->
     <section id="appSection" class="card oculto">
       <div class="form-control centrado">
         <label for="fechaFalta">Selecciona una fecha:</label>
@@ -75,6 +80,9 @@
   </main>
 
   <div id="toast" class="toast"></div>
-  <footer><p>Hecho con ❤️ y Firebase — 2025</p></footer>
+
+  <footer>
+    <p>Hecho con ❤️ y Firebase — 2025</p>
+  </footer>
 </body>
 </html>

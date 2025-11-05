@@ -1,7 +1,19 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// --- CONFIGURACIÓN FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCw-vPulec3ToBUzSV3N_7M4t4tGyzgAgM",
   authDomain: "controlfaltasclase.firebaseapp.com",
@@ -16,6 +28,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
+// --- DATOS BASE ---
 const horario = {
   Monday: { SRD: 1, SGY: 2, SSG: 1, IMW: 2 },
   Tuesday: { SRD: 2, SGY: 1, ADE: 1, IPW: 2 },
@@ -23,13 +36,17 @@ const horario = {
   Thursday: { SSG: 1, ADD: 2, IPW: 1 },
   Friday: { SRD: 2, ADE: 1, ADD: 3 },
 };
-const maxFaltas = { SRD: 41, SGY: 41, SSG: 22, IMW: 32, ADE: 14, IPW: 21, SOJ: 6, ADD: 41 };
+
+const maxFaltas = {
+  SRD: 41, SGY: 41, SSG: 22, IMW: 32,
+  ADE: 14, IPW: 21, SOJ: 6, ADD: 41
+};
 
 let faltas = {};
 let historial = [];
 let chart;
 
-// --- ELEMENTOS ---
+// --- ELEMENTOS DOM ---
 const loader = document.getElementById("loader");
 const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
@@ -47,15 +64,18 @@ const toast = document.getElementById("toast");
 const toggleTheme = document.getElementById("toggleTheme");
 const historialContainer = document.getElementById("historialContainer");
 
+// --- UTILIDADES ---
 function showToast(msg, color = "#0d6efd") {
   toast.textContent = msg;
   toast.style.background = color;
   toast.classList.add("visible");
   setTimeout(() => toast.classList.remove("visible"), 3000);
 }
+
 function showLoader(show) {
   loader.style.display = show ? "flex" : "none";
 }
+
 function toggleDarkMode() {
   const newTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
   document.body.dataset.theme = newTheme;
@@ -63,9 +83,22 @@ function toggleDarkMode() {
   toggleTheme.textContent = newTheme === "dark" ? "☀️" : "🌙";
 }
 
-// --- AUTH ---
-btnLogin.onclick = async () => signInWithPopup(auth, provider).catch(() => showToast("Error de inicio", "red"));
-btnLogout.onclick = async () => { await signOut(auth); showToast("Sesión cerrada"); };
+// --- AUTENTICACIÓN ---
+btnLogin.onclick = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch {
+    showToast("Error al iniciar sesión", "red");
+  }
+};
+
+btnLogout.onclick = async () => {
+  await signOut(auth);
+  showToast("Sesión cerrada");
+  loginSection.classList.remove("oculto");
+  appSection.classList.add("oculto");
+  btnLogout.classList.add("oculto");
+};
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
@@ -88,7 +121,11 @@ async function cargarDatos(uid) {
   if (snap.exists()) {
     faltas = snap.data().faltas || {};
     historial = snap.data().historial || [];
-  } else await setDoc(ref, { faltas: {}, historial: [] });
+  } else {
+    await setDoc(ref, { faltas: {}, historial: [] });
+  }
+
+  generarHistorialInicial();
   actualizarTabla();
   actualizarGrafico();
   renderHistorial();
@@ -107,11 +144,11 @@ function mostrarAsignaturasDelDia() {
   if (!fecha) return;
   const dia = new Date(fecha).toLocaleDateString("en-US", { weekday: "long" });
   const clases = horario[dia];
-  if (!clases) return asignaturasDelDia.innerHTML = "<p>No hay clases.</p>";
-  for (const m in clases) {
-    const horas = clases[m];
+  if (!clases) return (asignaturasDelDia.innerHTML = "<p>No hay clases.</p>");
+  for (const materia in clases) {
+    const horas = clases[materia];
     const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" value="${m}"> ${m} (${horas}h)`;
+    label.innerHTML = `<input type="checkbox" value="${materia}"> ${materia} (${horas}h)`;
     asignaturasDelDia.appendChild(label);
   }
 }
@@ -136,14 +173,20 @@ btnRegistrar.onclick = async () => {
     actualizarGrafico();
     renderHistorial();
     showToast("Faltas registradas", "#198754");
+  } else {
+    showToast("Selecciona al menos una asignatura", "orange");
   }
 };
 
 btnReiniciar.onclick = async () => {
   if (!confirm("¿Borrar todos los datos?")) return;
-  faltas = {}; historial = [];
+  faltas = {};
+  historial = [];
   await guardarDatos(auth.currentUser.uid);
-  actualizarTabla(); actualizarGrafico(); renderHistorial();
+  actualizarTabla();
+  actualizarGrafico();
+  renderHistorial();
+  showToast("Datos reiniciados", "orange");
 };
 
 btnExportar.onclick = () => {
@@ -161,16 +204,24 @@ inputImportJson.onchange = async (e) => {
   faltas = data.faltas || {};
   historial = data.historial || [];
   await guardarDatos(auth.currentUser.uid);
-  actualizarTabla(); actualizarGrafico(); renderHistorial();
+  actualizarTabla();
+  actualizarGrafico();
+  renderHistorial();
 };
 
 inputImportTxt.onchange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const lines = (await file.text()).split(/\r?\n/);
-  lines.forEach(l => { const [m, v] = l.split(":").map(s => s.trim()); if (m && !isNaN(v)) faltas[m] = +v; });
+  lines.forEach(l => {
+    const [m, v] = l.split(":").map(s => s.trim());
+    if (m && !isNaN(v)) faltas[m] = +v;
+  });
+  generarHistorialInicial();
   await guardarDatos(auth.currentUser.uid);
-  actualizarTabla(); actualizarGrafico();
+  actualizarTabla();
+  actualizarGrafico();
+  renderHistorial();
 };
 
 fechaFalta.onchange = mostrarAsignaturasDelDia;
@@ -186,6 +237,7 @@ function actualizarTabla() {
     tablaResumen.innerHTML += `<tr><td>${m}</td><td>${total}</td><td>${max}</td><td>${rest}</td></tr>`;
   }
 }
+
 function actualizarGrafico() {
   const ctx = document.getElementById("graficoFaltas");
   if (!ctx) return;
@@ -195,26 +247,42 @@ function actualizarGrafico() {
   if (chart) chart.destroy();
   chart = new Chart(ctx, {
     type: "bar",
-    data: { labels, datasets: [
-      { label: "Usadas", data: usados, backgroundColor: "#0d6efd" },
-      { label: "Restantes", data: restantes, backgroundColor: "#198754" }
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+    data: {
+      labels,
+      datasets: [
+        { label: "Usadas", data: usados, backgroundColor: "#0d6efd" },
+        { label: "Restantes", data: restantes, backgroundColor: "#198754" }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } },
+      scales: { y: { beginAtZero: true } }
+    }
   });
 }
 
 // --- HISTORIAL ---
+function generarHistorialInicial() {
+  // Crear historial base si no existe pero hay faltas cargadas
+  if (historial.length === 0 && Object.keys(faltas).length > 0) {
+    const fechaAuto = new Date().toISOString().split("T")[0];
+    historial = Object.entries(faltas).map(([m]) => ({ fecha: fechaAuto, materias: [m] }));
+  }
+}
+
 function renderHistorial() {
   historialContainer.innerHTML = historial.length
     ? historial.map(h => `<div class="historial-entry"><b>${h.fecha}</b>: ${h.materias.join(", ")}</div>`).join("")
     : "<p>No hay registros aún.</p>";
 }
 
-// --- INIT ---
+// --- INICIO ---
 window.addEventListener("load", () => {
   showLoader(true);
   const theme = localStorage.getItem("theme") || "light";
   document.body.dataset.theme = theme;
   toggleTheme.textContent = theme === "dark" ? "☀️" : "🌙";
-  setTimeout(() => showLoader(false), 1000);
+  setTimeout(() => showLoader(false), 800);
 });
