@@ -2,17 +2,17 @@
   --primary: #0d6efd;
   --secondary: #6c757d;
   --accent: #198754;
-  --bg: #f8f9fa;
-  --text: #212529;
-  --radius: 10px;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --bg: #f4f6f8;
+  --text: #1e1e1e;
+  --card-bg: #ffffff;
+  --radius: 12px;
+  --shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #121212;
-    --text: #f1f1f1;
-  }
+[data-theme="dark"] {
+  --bg: #121212;
+  --text: #f1f1f1;
+  --card-bg: #1e1e1e;
 }
 
 body {
@@ -23,23 +23,57 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Loader */
+.loader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg);
+  z-index: 9999;
+}
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #ddd;
+  border-top: 6px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 header {
   background: var(--primary);
   color: white;
-  text-align: center;
-  padding: 1rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.header-buttons {
+  display: flex;
+  gap: 0.5rem;
 }
 
-h1, h2 {
-  margin: 0.5rem 0;
+#toggleTheme {
+  background: white;
+  border: none;
+  color: var(--primary);
+  font-size: 1.1rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+#toggleTheme:hover {
+  transform: rotate(20deg);
 }
 
 main {
@@ -47,17 +81,17 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  padding: 2rem 1rem;
 }
 
 .card {
-  background: white;
+  background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 1.5rem;
-  margin: 1rem;
-  max-width: 900px;
+  padding: 2rem;
   width: 100%;
+  max-width: 1000px;
+  transition: background 0.3s;
 }
 
 .centrado {
@@ -73,22 +107,22 @@ input[type="date"] {
 
 .botonera {
   text-align: center;
-  margin-top: 1rem;
+  margin: 1.5rem 0;
 }
 
 button, .custom-file-button {
   border: none;
   border-radius: 6px;
-  padding: 0.7rem 1.4rem;
+  padding: 0.7rem 1.5rem;
   cursor: pointer;
   font-weight: bold;
-  margin: 0.3rem;
-  transition: transform 0.2s ease, opacity 0.3s ease;
+  margin: 0.4rem;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 button:hover, .custom-file-button:hover {
-  transform: scale(1.03);
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary { background: var(--primary); color: white; }
@@ -98,43 +132,59 @@ button:hover, .custom-file-button:hover {
 .custom-file-button {
   background: var(--accent);
   color: white;
-  display: inline-block;
 }
 
 .hidden-file-input { display: none; }
 
-.table-contenedor {
+.table-container {
   overflow-x: auto;
+  margin-top: 1.5rem;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+thead {
+  background-color: var(--primary);
+  color: white;
 }
 
 th, td {
-  border: 1px solid #ddd;
-  padding: 0.7rem;
+  padding: 0.8rem 1rem;
   text-align: center;
 }
 
-th {
-  background: #e9ecef;
+tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+[data-theme="dark"] tbody tr:nth-child(even) {
+  background: #1a1a1a;
 }
 
-tr:nth-child(even) {
-  background: #f8f9fa;
+tbody tr:hover {
+  background: rgba(13, 110, 253, 0.1);
 }
 
 footer {
   text-align: center;
   padding: 1rem;
+  font-size: 0.9rem;
   opacity: 0.7;
 }
 
 .grafico-container {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
+  padding: 1rem;
+}
+
+#graficoFaltas {
+  width: 100%;
+  max-height: 400px;
 }
 
 .toast {
@@ -144,10 +194,11 @@ footer {
   transform: translateX(-50%);
   background: var(--primary);
   color: white;
-  padding: 0.8rem 1.5rem;
+  padding: 1rem 1.8rem;
   border-radius: 8px;
+  font-weight: 500;
   opacity: 0;
-  transition: opacity 0.5s, bottom 0.5s;
+  transition: opacity 0.4s, bottom 0.4s;
   z-index: 9999;
 }
 .toast.visible {
@@ -155,15 +206,9 @@ footer {
   bottom: 40px;
 }
 
-.oculto {
-  display: none;
-}
+.oculto { display: none; }
 
 @media (max-width: 768px) {
-  table {
-    font-size: 0.85rem;
-  }
-  button, .custom-file-button {
-    width: 90%;
-  }
+  table { font-size: 0.85rem; }
+  button, .custom-file-button { width: 90%; }
 }

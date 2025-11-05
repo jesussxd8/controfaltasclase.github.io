@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// --- CONFIG FIREBASE ---
+// --- FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCw-vPulec3ToBUzSV3N_7M4t4tGyzgAgM",
   authDomain: "controlfaltasclase.firebaseapp.com",
@@ -11,7 +11,6 @@ const firebaseConfig = {
   messagingSenderId: "874486434099",
   appId: "1:874486434099:web:778b916b3a17ad1b349646",
 };
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -26,11 +25,13 @@ const horario = {
   Friday: { SRD: 2, ADE: 1, ADD: 3 },
 };
 const maxFaltas = { SRD: 41, SGY: 41, SSG: 22, IMW: 32, ADE: 14, IPW: 21, SOJ: 6, ADD: 41 };
+
 let faltas = {};
 let currentUser = null;
 let chart;
 
-// --- ELEMENTOS DOM ---
+// --- ELEMENTOS ---
+const loader = document.getElementById("loader");
 const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
 const btnLogin = document.getElementById("btnLogin");
@@ -44,8 +45,9 @@ const btnExportar = document.getElementById("btnExportar");
 const inputImportJson = document.getElementById("inputImportJson");
 const inputImportTxt = document.getElementById("inputImportTxt");
 const toast = document.getElementById("toast");
+const toggleTheme = document.getElementById("toggleTheme");
 
-// --- UI Helpers ---
+// --- FUNCIONES UI ---
 function showToast(msg, color = "#0d6efd") {
   toast.textContent = msg;
   toast.style.background = color;
@@ -53,11 +55,23 @@ function showToast(msg, color = "#0d6efd") {
   setTimeout(() => toast.classList.remove("visible"), 3000);
 }
 
+function showLoader(show) {
+  loader.style.display = show ? "flex" : "none";
+}
+
+function toggleDarkMode() {
+  const current = document.body.getAttribute("data-theme");
+  const newTheme = current === "dark" ? "light" : "dark";
+  document.body.setAttribute("data-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
+  toggleTheme.textContent = newTheme === "dark" ? "☀️" : "🌙";
+}
+
 // --- AUTH ---
 btnLogin.onclick = async () => {
   try {
     await signInWithPopup(auth, provider);
-  } catch (e) {
+  } catch {
     showToast("Error al iniciar sesión", "red");
   }
 };
@@ -73,12 +87,12 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     mostrarApp();
     await cargarFaltas();
-  } else {
-    mostrarLogin();
-  }
+  } else mostrarLogin();
 });
 
+// --- MOSTRAR SECCIONES ---
 function mostrarLogin() {
+  showLoader(false);
   loginSection.classList.remove("oculto");
   appSection.classList.add("oculto");
   btnLogout.classList.add("oculto");
@@ -88,16 +102,19 @@ function mostrarApp() {
   loginSection.classList.add("oculto");
   appSection.classList.remove("oculto");
   btnLogout.classList.remove("oculto");
+  showLoader(false);
 }
 
 // --- FIRESTORE ---
 async function cargarFaltas() {
+  showLoader(true);
   const ref = doc(db, "usuarios", currentUser.uid);
   const snap = await getDoc(ref);
   faltas = snap.exists() ? snap.data().faltas || {} : {};
   await setDoc(ref, { faltas }, { merge: true });
   actualizarTabla();
   actualizarGrafico();
+  showLoader(false);
 }
 
 async function guardarFaltas() {
@@ -108,7 +125,7 @@ async function guardarFaltas() {
   showToast("Datos guardados correctamente", "#198754");
 }
 
-// --- FUNCIONALIDAD ---
+// --- LÓGICA PRINCIPAL ---
 function mostrarAsignaturasDelDia() {
   const fecha = fechaFalta.value;
   asignaturasDelDia.innerHTML = "";
@@ -157,9 +174,8 @@ function exportarFaltas() {
 async function importarFaltas(e) {
   const file = e.target.files[0];
   if (!file) return;
-  const text = await file.text();
   try {
-    const data = JSON.parse(text);
+    const data = JSON.parse(await file.text());
     faltas = data;
     await guardarFaltas();
     showToast("Importación JSON exitosa");
@@ -172,8 +188,7 @@ async function importarFaltasTxt(e) {
   const file = e.target.files[0];
   if (!file) return;
   const text = await file.text();
-  const lines = text.split(/\r?\n/);
-  lines.forEach(line => {
+  text.split(/\r?\n/).forEach(line => {
     const [m, v] = line.split(":").map(x => x.trim());
     if (m && !isNaN(v)) faltas[m] = parseInt(v);
   });
@@ -181,7 +196,7 @@ async function importarFaltasTxt(e) {
   showToast("Importación TXT completada");
 }
 
-// --- TABLA + GRAFICO ---
+// --- TABLA Y GRÁFICO ---
 function actualizarTabla() {
   tablaResumen.innerHTML = "";
   for (const materia in maxFaltas) {
@@ -208,7 +223,12 @@ function actualizarGrafico() {
         { label: "Restantes", data: restantes, backgroundColor: "#198754" }
       ]
     },
-    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } },
+      scales: { y: { beginAtZero: true } }
+    }
   });
 }
 
@@ -219,3 +239,13 @@ btnReiniciar.onclick = reiniciarFaltas;
 btnExportar.onclick = exportarFaltas;
 inputImportJson.onchange = importarFaltas;
 inputImportTxt.onchange = importarFaltasTxt;
+toggleTheme.onclick = toggleDarkMode;
+
+// --- INIT ---
+window.addEventListener("load", () => {
+  showLoader(true);
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.body.setAttribute("data-theme", savedTheme);
+  toggleTheme.textContent = savedTheme === "dark" ? "☀️" : "🌙";
+  setTimeout(() => showLoader(false), 800);
+});

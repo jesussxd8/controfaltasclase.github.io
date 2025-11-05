@@ -10,9 +10,17 @@
   <script type="module" src="script.js" defer></script>
 </head>
 <body>
+  <!-- Loader -->
+  <div id="loader" class="loader">
+    <div class="spinner"></div>
+  </div>
+
   <header>
     <h1>📚 Control de Faltas</h1>
-    <button id="btnLogout" class="oculto">Cerrar sesión</button>
+    <div class="header-buttons">
+      <button id="toggleTheme" title="Cambiar tema">🌙</button>
+      <button id="btnLogout" class="oculto">Cerrar sesión</button>
+    </div>
   </header>
 
   <main>
@@ -49,7 +57,7 @@
       </div>
 
       <h2 class="centrado">Resumen de Faltas</h2>
-      <div class="tabla-contenedor">
+      <div class="table-container">
         <table>
           <thead>
             <tr>
