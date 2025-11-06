@@ -15,6 +15,12 @@
   --card-bg: #1f1f1f;
 }
 
+/* Ocultar secciones dinámicamente */
+.oculto {
+  display: none !important;
+}
+
+/* ===== GLOBAL ===== */
 body {
   font-family: "Inter", sans-serif;
   background-color: var(--bg);
@@ -26,7 +32,7 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
-/* HEADER */
+/* ===== HEADER ===== */
 header {
   background: var(--primary);
   color: white;
@@ -40,21 +46,24 @@ header {
 
 .header-buttons {
   display: flex;
-  gap: 0.5rem;
   flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
 #toggleTheme,
 #btnLogout {
-  background: white;
   border: none;
-  color: var(--primary);
-  font-size: 1rem;
-  padding: 0.5rem 0.9rem;
   border-radius: 8px;
+  padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: 600;
-  transition: transform 0.3s;
+  font-size: 1rem;
+  transition: transform 0.2s, background 0.3s;
+}
+
+#toggleTheme {
+  background: white;
+  color: var(--primary);
 }
 
 #btnLogout {
@@ -67,7 +76,7 @@ header {
   transform: scale(1.05);
 }
 
-/* LOADER */
+/* ===== LOADER ===== */
 .loader {
   position: fixed;
   inset: 0;
@@ -91,12 +100,11 @@ header {
   }
 }
 
-/* MAIN */
+/* ===== MAIN ===== */
 main {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
   padding: 2rem 1rem;
 }
 
@@ -106,8 +114,8 @@ main {
   box-shadow: var(--shadow);
   padding: 2rem;
   width: 100%;
-  max-width: 1000px;
-  transition: background 0.3s, transform 0.3s;
+  max-width: 900px;
+  transition: background 0.3s;
   animation: fadeIn 0.6s ease-in-out;
 }
 
@@ -126,16 +134,16 @@ main {
   text-align: center;
 }
 
-/* FORMULARIO */
+/* ===== FORM ===== */
 input[type="date"] {
-  padding: 0.5rem;
+  padding: 0.6rem;
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 1rem;
-  margin-top: 0.3rem;
+  margin-top: 0.4rem;
 }
 
-/* BOTONES */
+/* ===== BOTONES ===== */
 .botonera {
   display: flex;
   flex-direction: column;
@@ -155,7 +163,6 @@ button,
 .custom-file-button {
   flex: 1 1 180px;
   max-width: 220px;
-  min-width: 180px;
   text-align: center;
   border: none;
   border-radius: 8px;
@@ -200,7 +207,7 @@ button:hover,
   cursor: pointer;
 }
 
-/* TABLA */
+/* ===== TABLA ===== */
 .table-container {
   overflow-x: auto;
   margin-top: 1.5rem;
@@ -222,51 +229,47 @@ td {
   text-align: center;
 }
 tbody tr:nth-child(even) {
-  background: #f9f9f9;
-}
-[data-theme="dark"] tbody tr:nth-child(even) {
-  background: #1a1a1a;
+  background: rgba(0, 0, 0, 0.03);
 }
 tbody tr:hover {
   background: rgba(13, 110, 253, 0.1);
 }
 
-/* HISTORIAL MEJORADO */
+/* ===== HISTORIAL ===== */
 .historial {
   margin-top: 1.5rem;
+  background: rgba(0, 0, 0, 0.03);
   padding: 1rem;
   border-radius: 8px;
   font-size: 0.95rem;
   line-height: 1.5;
-  background: rgba(0, 0, 0, 0.03);
 }
 .historial h3 {
   text-align: center;
   margin-bottom: 1rem;
 }
 .historial p {
-  margin: 0.5rem 0;
-  padding: 0.6rem 0.8rem;
-  border-left: 4px solid var(--primary);
+  margin: 0.4rem 0;
+  padding: 0.5rem;
   background: rgba(13, 110, 253, 0.05);
+  border-left: 4px solid var(--primary);
   border-radius: 6px;
 }
 .historial b {
   color: var(--primary);
 }
 
-/* GRAFICO */
+/* ===== GRAFICO ===== */
 .grafico-container {
-  margin-top: 2.5rem;
+  margin-top: 2rem;
   padding: 1rem;
-  animation: fadeIn 0.6s ease-in-out;
 }
 #graficoFaltas {
   width: 100%;
   max-height: 400px;
 }
 
-/* TOAST */
+/* ===== TOAST ===== */
 .toast {
   position: fixed;
   bottom: 20px;
@@ -286,7 +289,7 @@ tbody tr:hover {
   bottom: 40px;
 }
 
-/* FOOTER */
+/* ===== FOOTER ===== */
 footer {
   text-align: center;
   padding: 1rem;
@@ -294,16 +297,13 @@ footer {
   opacity: 0.7;
 }
 
-/* RESPONSIVE */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   header {
     flex-direction: column;
     align-items: center;
     text-align: center;
-  }
-
-  .header-buttons {
-    justify-content: center;
+    gap: 0.5rem;
   }
 
   .card {
@@ -313,9 +313,33 @@ footer {
   button,
   .custom-file-button {
     width: 90%;
+    max-width: none;
   }
 
   .botonera-fila {
     flex-direction: column;
+  }
+
+  th,
+  td {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+
+  #btnLogout {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.3rem;
+  }
+  h2 {
+    font-size: 1.1rem;
+  }
+  button {
+    font-size: 0.9rem;
+    padding: 0.8rem;
   }
 }

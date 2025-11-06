@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Control de Faltas</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="assets/logo.svg" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script type="module" src="script.js" defer></script>
 </head>
 
 <body>
-  <!-- Loader -->
+  <!-- LOADER -->
   <div id="loader" class="loader">
     <div class="spinner"></div>
   </div>
 
+  <!-- HEADER -->
   <header>
     <h1>📚 Control de Faltas</h1>
     <div class="header-buttons">
@@ -29,11 +29,11 @@
     <!-- LOGIN -->
     <section id="loginSection" class="card centrado">
       <h2>Bienvenido</h2>
-      <p>Inicia sesión con tu cuenta de Google</p>
+      <p>Inicia sesión con tu cuenta de Google para continuar</p>
       <button id="btnLogin" class="btn-primary">Iniciar sesión con Google</button>
     </section>
 
-    <!-- APP -->
+    <!-- APP PRINCIPAL -->
     <section id="appSection" class="card oculto">
       <div class="form-control centrado">
         <label for="fechaFalta">Selecciona una fecha:</label>
@@ -59,7 +59,6 @@
             📥 Importar JSON
             <input type="file" id="inputImportJson" accept=".json" class="hidden-file-input" />
           </label>
-
           <label class="custom-file-button">
             📥 Importar TXT
             <input type="file" id="inputImportTxt" accept=".txt" class="hidden-file-input" />
