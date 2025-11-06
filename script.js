@@ -13,7 +13,7 @@ import {
   setDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// --- FIREBASE CONFIG ---
+// === FIREBASE CONFIG ===
 const firebaseConfig = {
   apiKey: "AIzaSyCw-vPulec3ToBUzSV3N_7M4t4tGyzgAgM",
   authDomain: "controlfaltasclase.firebaseapp.com",
@@ -27,14 +27,14 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// --- VARIABLES ---
+// === VARIABLES ===
 let horario = {};
-let maxFaltas = {};
 let faltas = {};
+let maxFaltas = {};
 let currentUser = null;
 let chart;
 
-// --- ELEMENTOS DOM ---
+// === ELEMENTOS DOM ===
 const loader = document.getElementById("loader");
 const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
@@ -57,7 +57,7 @@ const contenidoHorario = document.getElementById("contenidoHorario");
 const btnGuardarHorario = document.getElementById("btnGuardarHorario");
 const btnCerrarModal = document.getElementById("btnCerrarModal");
 
-// --- UI ---
+// === UTILIDADES ===
 function showToast(msg, color = "#0d6efd") {
   toast.textContent = msg;
   toast.style.background = color;
@@ -75,7 +75,7 @@ function toggleDarkMode() {
   toggleTheme.textContent = newTheme === "dark" ? "☀️" : "🌙";
 }
 
-// --- AUTH ---
+// === AUTH ===
 btnLogin.onclick = async () => {
   try {
     showLoader(true);
@@ -93,7 +93,7 @@ btnLogout.onclick = async () => {
   showToast("Sesión cerrada");
 };
 
-// --- SESIÓN ---
+// === SESIÓN ===
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -115,31 +115,28 @@ function mostrarApp() {
   btnLogout.classList.remove("oculto");
 }
 
-// --- FIRESTORE ---
+// === FIRESTORE ===
 async function cargarDatosUsuario() {
   try {
     showLoader(true);
     const ref = doc(db, "usuarios", currentUser.uid);
     const snap = await getDoc(ref);
-
     if (!snap.exists()) {
-      horario = { Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {} };
-      maxFaltas = {};
+      horario = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
       faltas = {};
-      await setDoc(ref, { horario, maxFaltas, faltas });
-      showToast("Crea tu horario en el botón superior", "#0d6efd");
+      maxFaltas = {};
+      await setDoc(ref, { horario, faltas, maxFaltas });
+      showToast("Crea tu horario con el botón superior", "#0d6efd");
       return;
     }
-
     const data = snap.data();
-    horario = data.horario || {};
-    maxFaltas = data.maxFaltas || {};
+    horario = data.horario || { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
     faltas = data.faltas || {};
-
+    maxFaltas = data.maxFaltas || {};
     actualizarTabla();
     actualizarGrafico();
   } catch (err) {
-    console.error("Error al cargar datos:", err);
+    console.error(err);
     showToast("Error al cargar datos", "red");
   } finally {
     showLoader(false);
@@ -147,10 +144,10 @@ async function cargarDatosUsuario() {
 }
 async function guardarDatosUsuario() {
   const ref = doc(db, "usuarios", currentUser.uid);
-  await setDoc(ref, { horario, maxFaltas, faltas }, { merge: true });
+  await setDoc(ref, { horario, faltas, maxFaltas }, { merge: true });
 }
 
-// --- MODAL DE HORARIO ---
+// === MODAL DE HORARIO ===
 btnEditarHorario.onclick = () => {
   modal.classList.remove("oculto");
   generarTabs();
@@ -178,13 +175,10 @@ function generarTabs() {
 
 function renderDia(dia) {
   contenidoHorario.innerHTML = "";
-  const clases = horario[dia] || {};
+  const bloques = horario[dia] || [];
   const lista = document.createElement("div");
 
-  Object.entries(clases).forEach(([materia, datos]) => {
-    const fila = crearFilaHorario(materia, datos.horas, datos.max);
-    lista.appendChild(fila);
-  });
+  bloques.forEach(b => lista.appendChild(crearFilaHorario(b.materia, b.hora, b.max)));
 
   const btnAdd = document.createElement("button");
   btnAdd.className = "btn-accent";
@@ -194,12 +188,12 @@ function renderDia(dia) {
   contenidoHorario.appendChild(btnAdd);
 }
 
-function crearFilaHorario(materia = "", horas = "", max = "") {
+function crearFilaHorario(materia = "", hora = "", max = "") {
   const fila = document.createElement("div");
   fila.className = "fila-horario";
   fila.innerHTML = `
     <input type="text" class="materia" placeholder="Asignatura" value="${materia}" />
-    <input type="number" class="horas" placeholder="Horas" value="${horas}" min="1" max="10" />
+    <input type="number" class="hora" placeholder="Hora (1-6)" value="${hora}" min="1" max="10" />
     <input type="number" class="max" placeholder="Límite" value="${max}" min="1" max="100" />
     <button class="btn-secondary eliminar">🗑️</button>
   `;
@@ -210,20 +204,22 @@ function crearFilaHorario(materia = "", horas = "", max = "") {
 btnGuardarHorario.onclick = async () => {
   const diaActivo = document.querySelector(".tabs button.active").textContent;
   const filas = contenidoHorario.querySelectorAll(".fila-horario");
-  const clases = {};
+  const bloques = [];
   filas.forEach(f => {
     const materia = f.querySelector(".materia").value.trim();
-    const horas = parseInt(f.querySelector(".horas").value || 0);
+    const hora = parseInt(f.querySelector(".hora").value || 0);
     const max = parseInt(f.querySelector(".max").value || 0);
-    if (materia && horas > 0) clases[materia] = { horas, max };
+    if (materia && hora > 0) bloques.push({ materia, hora, max });
   });
-  horario[diaActivo] = clases;
+  horario[diaActivo] = bloques;
 
-  // Actualizar límites globales
+  // recalcular límites globales
   maxFaltas = {};
-  Object.values(horario).forEach(clasesDia => {
-    Object.entries(clasesDia).forEach(([m, d]) => {
-      if (d.max) maxFaltas[m] = d.max;
+  Object.values(horario).forEach(bloquesDia => {
+    bloquesDia.forEach(b => {
+      if (!maxFaltas[b.materia] || b.max > maxFaltas[b.materia]) {
+        maxFaltas[b.materia] = b.max;
+      }
     });
   });
 
@@ -234,36 +230,36 @@ btnGuardarHorario.onclick = async () => {
   showToast("Horario guardado correctamente", "#198754");
 };
 
-// --- FALTAS ---
+// === REGISTRAR FALTAS ===
 fechaFalta.onchange = mostrarAsignaturasDelDia;
 function mostrarAsignaturasDelDia() {
   const fecha = fechaFalta.value;
   asignaturasDelDia.innerHTML = "";
   if (!fecha) return;
   const dia = new Date(fecha).toLocaleDateString("en-US", { weekday: "long" });
-  const clases = horario[dia];
-  if (!clases || Object.keys(clases).length === 0)
+  const bloques = horario[dia];
+  if (!bloques || bloques.length === 0)
     return (asignaturasDelDia.innerHTML = "<p>No hay clases este día.</p>");
-  for (const materia in clases) {
-    const horas = clases[materia].horas || 0;
+  bloques.forEach((b, i) => {
     const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" value="${materia}"> ${materia} (${horas}h)`;
+    label.innerHTML = `<input type="checkbox" value="${i}"> ${b.materia} (Hora ${b.hora})`;
     asignaturasDelDia.appendChild(label);
-  }
+  });
 }
 
 btnRegistrar.onclick = async () => {
   const fecha = fechaFalta.value;
   if (!fecha) return showToast("Selecciona una fecha", "red");
   const dia = new Date(fecha).toLocaleDateString("en-US", { weekday: "long" });
+  const bloques = horario[dia] || [];
   const checks = asignaturasDelDia.querySelectorAll("input[type='checkbox']");
   checks.forEach(cb => {
     if (cb.checked) {
-      const materia = cb.value;
-      const horas = horario[dia]?.[materia]?.horas || 0;
-      if (!faltas[materia]) faltas[materia] = { total: 0, historial: [] };
-      faltas[materia].total += horas;
-      faltas[materia].historial.push(`${fecha} (${horas}h)`);
+      const index = parseInt(cb.value);
+      const b = bloques[index];
+      if (!faltas[b.materia]) faltas[b.materia] = { total: 0, historial: [] };
+      faltas[b.materia].total += 1;
+      faltas[b.materia].historial.push(`${fecha} (Hora ${b.hora})`);
     }
   });
   await guardarDatosUsuario();
@@ -281,22 +277,21 @@ btnReiniciar.onclick = async () => {
   showToast("Faltas reiniciadas", "orange");
 };
 
-// --- TABLA Y GRAFICO ---
+// === TABLA Y GRÁFICO ===
 function actualizarTabla() {
   tablaResumen.innerHTML = "";
   let historialHTML = "<h3>Historial de faltas</h3>";
   const todas = new Set([...Object.keys(maxFaltas), ...Object.keys(faltas)]);
-
   todas.forEach(m => {
     const datos = faltas[m] || { total: 0, historial: [] };
     const total = datos.total;
     const max = maxFaltas[m] || 10;
     const restantes = Math.max(0, max - total);
-    const sobrepasado = total >= max ? 'style="color:red;font-weight:bold;"' : "";
+    const alerta = total >= max ? 'style="color:red;font-weight:bold;"' : "";
     if (total >= max) showToast(`${m} ha superado el límite`, "red");
 
     tablaResumen.innerHTML += `
-      <tr ${sobrepasado}>
+      <tr ${alerta}>
         <td>${m}</td>
         <td>${total}</td>
         <td>${max}</td>
@@ -327,7 +322,7 @@ function actualizarGrafico() {
   });
 }
 
-// --- INIT ---
+// === INIT ===
 toggleTheme.onclick = toggleDarkMode;
 tipoGrafico.onchange = actualizarGrafico;
 
