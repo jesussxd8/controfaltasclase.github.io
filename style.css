@@ -91,7 +91,13 @@ main {
   padding: 2rem;
   width: 100%;
   max-width: 1000px;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.3s;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .centrado {
@@ -121,7 +127,7 @@ button, .custom-file-button {
 }
 
 button:hover, .custom-file-button:hover {
-  transform: translateY(-2px);
+  transform: scale(1.05);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -147,6 +153,7 @@ table {
   font-size: 1rem;
   border-radius: 8px;
   overflow: hidden;
+  transition: all 0.3s ease-in-out;
 }
 
 thead {
@@ -180,6 +187,7 @@ footer {
 .grafico-container {
   margin-top: 2.5rem;
   padding: 1rem;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
 #graficoFaltas {
@@ -204,6 +212,12 @@ footer {
 .toast.visible {
   opacity: 1;
   bottom: 40px;
+  animation: popUp 0.5s ease forwards;
+}
+
+@keyframes popUp {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 .oculto { display: none; }

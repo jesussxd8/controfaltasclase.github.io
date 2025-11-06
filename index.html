@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="assets/logo.svg" />
   <script src="libs/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script type="module" src="script.js" defer></script>
 </head>
 <body>
@@ -43,7 +44,9 @@
       <div class="botonera">
         <button id="btnRegistrar" class="btn-primary">Registrar faltas</button>
         <button id="btnReiniciar" class="btn-secondary">Reiniciar</button>
-        <button id="btnExportar" class="btn-accent">📤 Exportar</button>
+        <button id="btnExportar" class="btn-accent">📤 Exportar JSON</button>
+        <button id="btnExportarPDF" class="btn-accent">📄 Exportar PDF</button>
+        <button id="btnExportarCSV" class="btn-secondary">📊 Exportar Excel (CSV)</button>
 
         <label class="custom-file-button">
           📥 Importar JSON
@@ -72,6 +75,14 @@
       </div>
 
       <div class="grafico-container">
+        <div class="grafico-opciones centrado">
+          <label>Tipo de gráfico:</label>
+          <select id="tipoGrafico">
+            <option value="bar">Barras</option>
+            <option value="doughnut">Dona</option>
+            <option value="line">Líneas</option>
+          </select>
+        </div>
         <canvas id="graficoFaltas"></canvas>
       </div>
     </section>

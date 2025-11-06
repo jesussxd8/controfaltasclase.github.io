@@ -42,10 +42,13 @@ const tablaResumen = document.getElementById("tablaResumen");
 const btnRegistrar = document.getElementById("btnRegistrar");
 const btnReiniciar = document.getElementById("btnReiniciar");
 const btnExportar = document.getElementById("btnExportar");
+const btnExportarPDF = document.getElementById("btnExportarPDF");
+const btnExportarCSV = document.getElementById("btnExportarCSV");
 const inputImportJson = document.getElementById("inputImportJson");
 const inputImportTxt = document.getElementById("inputImportTxt");
 const toast = document.getElementById("toast");
 const toggleTheme = document.getElementById("toggleTheme");
+const tipoGrafico = document.getElementById("tipoGrafico");
 
 // --- FUNCIONES UI ---
 function showToast(msg, color = "#0d6efd") {
@@ -150,7 +153,9 @@ async function registrarFaltas() {
     if (cb.checked) {
       const materia = cb.value;
       const horas = horario[dia][materia] || 0;
-      faltas[materia] = (faltas[materia] || 0) + horas;
+      if (!faltas[materia]) faltas[materia] = { total: 0, historial: [] };
+      faltas[materia].total += horas;
+      faltas[materia].historial.push(fecha);
     }
   });
   await guardarFaltas();
@@ -190,32 +195,65 @@ async function importarFaltasTxt(e) {
   const text = await file.text();
   text.split(/\r?\n/).forEach(line => {
     const [m, v] = line.split(":").map(x => x.trim());
-    if (m && !isNaN(v)) faltas[m] = parseInt(v);
+    if (m && !isNaN(v)) faltas[m] = { total: parseInt(v), historial: [] };
   });
   await guardarFaltas();
   showToast("Importación TXT completada");
 }
 
+// --- EXPORTAR PDF / CSV ---
+btnExportarPDF.onclick = () => {
+  const elemento = document.querySelector(".table-container");
+  const opciones = { margin: 0.5, filename: "faltas.pdf", html2canvas: { scale: 2 }, jsPDF: { unit: "in", format: "a4" } };
+  html2pdf().set(opciones).from(elemento).save();
+};
+
+btnExportarCSV.onclick = () => {
+  const filas = [["Asignatura", "Faltas", "Máximo", "Restantes"]];
+  for (const materia in maxFaltas) {
+    const datos = faltas[materia] || { total: 0 };
+    const total = datos.total;
+    const max = maxFaltas[materia];
+    const restantes = Math.max(0, max - total);
+    filas.push([materia, total, max, restantes]);
+  }
+  const csv = filas.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "faltas.csv";
+  a.click();
+};
+
 // --- TABLA Y GRÁFICO ---
 function actualizarTabla() {
   tablaResumen.innerHTML = "";
   for (const materia in maxFaltas) {
-    const total = faltas[materia] || 0;
+    const datos = faltas[materia] || { total: 0, historial: [] };
+    const total = datos.total;
     const max = maxFaltas[materia];
     const restantes = Math.max(0, max - total);
-    tablaResumen.innerHTML += `<tr><td>${materia}</td><td>${total}</td><td>${max}</td><td>${restantes}</td></tr>`;
+    const sobrepasado = total >= max ? 'style="color:red;font-weight:bold;"' : "";
+    if (total >= max) showToast(`${materia} ha superado el límite`, "red");
+    tablaResumen.innerHTML += `
+      <tr ${sobrepasado}>
+        <td>${materia}</td>
+        <td>${total}</td>
+        <td>${max}</td>
+        <td>${restantes}</td>
+      </tr>`;
   }
 }
 
 function actualizarGrafico() {
   const ctx = document.getElementById("graficoFaltas");
   const labels = Object.keys(maxFaltas);
-  const usados = labels.map(m => faltas[m] || 0);
-  const restantes = labels.map(m => Math.max(0, maxFaltas[m] - (faltas[m] || 0)));
+  const usados = labels.map(m => (faltas[m]?.total) || 0);
+  const restantes = labels.map(m => Math.max(0, maxFaltas[m] - (faltas[m]?.total || 0)));
 
   if (chart) chart.destroy();
   chart = new Chart(ctx, {
-    type: "bar",
+    type: tipoGrafico.value,
     data: {
       labels,
       datasets: [
@@ -225,9 +263,7 @@ function actualizarGrafico() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
       plugins: { legend: { position: "bottom" } },
-      scales: { y: { beginAtZero: true } }
     }
   });
 }
@@ -240,6 +276,7 @@ btnExportar.onclick = exportarFaltas;
 inputImportJson.onchange = importarFaltas;
 inputImportTxt.onchange = importarFaltasTxt;
 toggleTheme.onclick = toggleDarkMode;
+tipoGrafico.onchange = actualizarGrafico;
 
 // --- INIT ---
 window.addEventListener("load", () => {
