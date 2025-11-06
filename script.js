@@ -29,13 +29,7 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 // --- VARIABLES ---
-const horario = {
-  Monday: { SRD: 1, SGY: 2, SSG: 1, IMW: 2 },
-  Tuesday: { SRD: 2, SGY: 1, ADE: 1, IPW: 2 },
-  Wednesday: { SGY: 2, IMW: 2, SSG: 1, SOJ: 1 },
-  Thursday: { SSG: 1, ADD: 2, IPW: 1 },
-  Friday: { SRD: 2, ADE: 1, ADD: 3 },
-};
+let horario = {}; // ahora se carga desde Firestore
 const maxFaltas = {
   SRD: 41, SGY: 41, SSG: 22, IMW: 32, ADE: 14, IPW: 21, SOJ: 6, ADD: 41
 };
@@ -48,8 +42,15 @@ let chart;
 const loader = document.getElementById("loader");
 const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
+const horarioSection = document.getElementById("horarioSection");
+const horarioForm = document.getElementById("horarioForm");
+
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
+const btnEditarHorario = document.getElementById("btnEditarHorario");
+const btnGuardarHorario = document.getElementById("btnGuardarHorario");
+const btnVolverApp = document.getElementById("btnVolverApp");
+
 const fechaFalta = document.getElementById("fechaFalta");
 const asignaturasDelDia = document.getElementById("asignaturasDelDia");
 const tablaResumen = document.getElementById("tablaResumen");
@@ -108,7 +109,7 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     mostrarApp();
-    await cargarFaltas();
+    await cargarDatosUsuario();
   } else {
     mostrarLogin();
   }
@@ -119,28 +120,43 @@ function mostrarLogin() {
   showLoader(false);
   loginSection.classList.remove("oculto");
   appSection.classList.add("oculto");
+  horarioSection.classList.add("oculto");
   btnLogout.classList.add("oculto");
 }
 
 function mostrarApp() {
   loginSection.classList.add("oculto");
   appSection.classList.remove("oculto");
+  horarioSection.classList.add("oculto");
   btnLogout.classList.remove("oculto");
   showLoader(false);
 }
 
+function mostrarHorarioEditor() {
+  appSection.classList.add("oculto");
+  horarioSection.classList.remove("oculto");
+}
+
+function volverApp() {
+  horarioSection.classList.add("oculto");
+  appSection.classList.remove("oculto");
+}
+
 // --- FIRESTORE ---
-async function cargarFaltas() {
+async function cargarDatosUsuario() {
   try {
     showLoader(true);
     const ref = doc(db, "usuarios", currentUser.uid);
     const snap = await getDoc(ref);
 
     if (!snap.exists()) {
-      await setDoc(ref, { faltas: {} });
+      await setDoc(ref, { faltas: {}, horario: {} });
       faltas = {};
+      horario = {};
     } else {
-      faltas = snap.data().faltas || {};
+      const data = snap.data();
+      faltas = data.faltas || {};
+      horario = data.horario || {};
     }
 
     actualizarTabla();
@@ -153,17 +169,85 @@ async function cargarFaltas() {
   }
 }
 
-async function guardarFaltas() {
+async function guardarDatosUsuario() {
   try {
     const ref = doc(db, "usuarios", currentUser.uid);
-    await setDoc(ref, { faltas }, { merge: true });
-    actualizarTabla();
-    actualizarGrafico();
-    showToast("Datos guardados correctamente", "#198754");
-  } catch (e) {
-    console.error("Error guardando faltas:", e);
-    showToast("Error al guardar", "red");
+    await setDoc(ref, { faltas, horario }, { merge: true });
+  } catch (err) {
+    console.error("Error al guardar datos:", err);
   }
+}
+
+// --- HORARIO PERSONALIZADO ---
+function renderHorarioForm() {
+  const dias = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  horarioForm.innerHTML = "";
+
+  dias.forEach(dia => {
+    const clases = horario[dia] || {};
+    const container = document.createElement("div");
+    container.className = "horario-dia";
+    container.innerHTML = `<h3>${dia}</h3>`;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "horario-dia-clases";
+
+    Object.entries(clases).forEach(([materia, horas]) => {
+      const row = document.createElement("div");
+      row.className = "fila-horario";
+      row.innerHTML = `
+        <input type="text" class="materia" value="${materia}" placeholder="Asignatura" />
+        <input type="number" class="horas" value="${horas}" min="1" max="6" />
+        <button class="btn-secondary eliminar">🗑️</button>
+      `;
+      wrapper.appendChild(row);
+    });
+
+    const btnAdd = document.createElement("button");
+    btnAdd.className = "btn-accent";
+    btnAdd.textContent = "➕ Añadir asignatura";
+    btnAdd.onclick = () => {
+      const row = document.createElement("div");
+      row.className = "fila-horario";
+      row.innerHTML = `
+        <input type="text" class="materia" placeholder="Asignatura" />
+        <input type="number" class="horas" placeholder="Horas" min="1" max="6" />
+        <button class="btn-secondary eliminar">🗑️</button>
+      `;
+      wrapper.appendChild(row);
+      row.querySelector(".eliminar").onclick = () => row.remove();
+    };
+
+    container.appendChild(wrapper);
+    container.appendChild(btnAdd);
+    horarioForm.appendChild(container);
+
+    wrapper.querySelectorAll(".eliminar").forEach(btn => {
+      btn.onclick = () => btn.parentElement.remove();
+    });
+  });
+}
+
+async function guardarHorario() {
+  const dias = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const nuevoHorario = {};
+
+  dias.forEach((dia, index) => {
+    const container = horarioForm.children[index];
+    const materias = container.querySelectorAll(".fila-horario");
+    const clases = {};
+    materias.forEach(row => {
+      const materia = row.querySelector(".materia").value.trim();
+      const horas = parseInt(row.querySelector(".horas").value);
+      if (materia && horas > 0) clases[materia] = horas;
+    });
+    nuevoHorario[dia] = clases;
+  });
+
+  horario = nuevoHorario;
+  await guardarDatosUsuario();
+  showToast("Horario guardado correctamente", "#198754");
+  volverApp();
 }
 
 // --- FUNCIONES PRINCIPALES ---
@@ -173,7 +257,8 @@ function mostrarAsignaturasDelDia() {
   if (!fecha) return;
   const dia = new Date(fecha).toLocaleDateString("en-US", { weekday: "long" });
   const clases = horario[dia];
-  if (!clases) return (asignaturasDelDia.innerHTML = "<p>No hay clases este día.</p>");
+  if (!clases || Object.keys(clases).length === 0)
+    return (asignaturasDelDia.innerHTML = "<p>No hay clases este día.</p>");
   for (const materia in clases) {
     const horas = clases[materia];
     const label = document.createElement("label");
@@ -190,57 +275,28 @@ async function registrarFaltas() {
   checks.forEach(cb => {
     if (cb.checked) {
       const materia = cb.value;
-      const horas = horario[dia][materia] || 0;
+      const horas = horario[dia]?.[materia] || 0;
       if (!faltas[materia]) faltas[materia] = { total: 0, historial: [] };
       faltas[materia].total += horas;
       faltas[materia].historial.push(`${fecha} (${horas}h)`);
     }
   });
-  await guardarFaltas();
+  await guardarDatosUsuario();
+  actualizarTabla();
+  actualizarGrafico();
+  showToast("Faltas registradas", "#198754");
 }
 
 async function reiniciarFaltas() {
   if (!confirm("¿Seguro que deseas reiniciar todas las faltas?")) return;
   faltas = {};
-  await guardarFaltas();
+  await guardarDatosUsuario();
+  actualizarTabla();
+  actualizarGrafico();
   showToast("Faltas reiniciadas", "orange");
 }
 
-// --- EXPORTAR / IMPORTAR ---
-function exportarFaltas() {
-  const blob = new Blob([JSON.stringify(faltas, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "faltas.json";
-  a.click();
-}
-
-async function importarFaltas(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const data = JSON.parse(await file.text());
-    faltas = data;
-    await guardarFaltas();
-    showToast("Importación JSON exitosa");
-  } catch {
-    showToast("Archivo JSON inválido", "red");
-  }
-}
-
-async function importarFaltasTxt(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const text = await file.text();
-  text.split(/\r?\n/).forEach(line => {
-    const [m, v] = line.split(":").map(x => x.trim());
-    if (m && !isNaN(v)) faltas[m] = { total: parseInt(v), historial: [] };
-  });
-  await guardarFaltas();
-  showToast("Importación TXT completada");
-}
-
-// --- TABLA Y GRÁFICO ---
+// --- TABLA Y GRAFICO ---
 function actualizarTabla() {
   tablaResumen.innerHTML = "";
   let historialHTML = "<h3>Historial de faltas</h3>";
@@ -284,10 +340,7 @@ function actualizarGrafico() {
         { label: "Restantes", data: restantes, backgroundColor: "#198754" }
       ]
     },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "bottom" } },
-    }
+    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
   });
 }
 
@@ -295,9 +348,9 @@ function actualizarGrafico() {
 fechaFalta.onchange = mostrarAsignaturasDelDia;
 btnRegistrar.onclick = registrarFaltas;
 btnReiniciar.onclick = reiniciarFaltas;
-btnExportar.onclick = exportarFaltas;
-inputImportJson.onchange = importarFaltas;
-inputImportTxt.onchange = importarFaltasTxt;
+btnEditarHorario.onclick = () => { renderHorarioForm(); mostrarHorarioEditor(); };
+btnGuardarHorario.onclick = guardarHorario;
+btnVolverApp.onclick = volverApp;
 toggleTheme.onclick = toggleDarkMode;
 tipoGrafico.onchange = actualizarGrafico;
 

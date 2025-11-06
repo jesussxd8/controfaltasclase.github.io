@@ -11,12 +11,8 @@
 </head>
 
 <body>
-  <!-- LOADER -->
-  <div id="loader" class="loader">
-    <div class="spinner"></div>
-  </div>
+  <div id="loader" class="loader"><div class="spinner"></div></div>
 
-  <!-- HEADER -->
   <header>
     <h1>📚 Control de Faltas</h1>
     <div class="header-buttons">
@@ -33,8 +29,12 @@
       <button id="btnLogin" class="btn-primary">Iniciar sesión con Google</button>
     </section>
 
-    <!-- APP PRINCIPAL -->
+    <!-- APP -->
     <section id="appSection" class="card oculto">
+      <div class="centrado">
+        <button id="btnEditarHorario" class="btn-accent">🗓️ Editar mi horario</button>
+      </div>
+
       <div class="form-control centrado">
         <label for="fechaFalta">Selecciona una fecha:</label>
         <input type="date" id="fechaFalta" />
@@ -93,6 +93,19 @@
           </select>
         </div>
         <canvas id="graficoFaltas"></canvas>
+      </div>
+    </section>
+
+    <!-- EDITOR DE HORARIO -->
+    <section id="horarioSection" class="card oculto">
+      <h2 class="centrado">🗓️ Editar mi horario</h2>
+      <p class="centrado">Añade las asignaturas y horas de clase para cada día.</p>
+
+      <div id="horarioForm"></div>
+
+      <div class="centrado" style="margin-top: 1rem;">
+        <button id="btnGuardarHorario" class="btn-primary">💾 Guardar horario</button>
+        <button id="btnVolverApp" class="btn-secondary">⬅️ Volver</button>
       </div>
     </section>
   </main>

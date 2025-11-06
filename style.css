@@ -15,7 +15,6 @@
   --card-bg: #1f1f1f;
 }
 
-/* Ocultar secciones dinámicamente */
 .oculto {
   display: none !important;
 }
@@ -135,7 +134,10 @@ main {
 }
 
 /* ===== FORM ===== */
-input[type="date"] {
+input[type="date"],
+input[type="text"],
+input[type="number"],
+select {
   padding: 0.6rem;
   border-radius: 6px;
   border: 1px solid #ccc;
@@ -269,6 +271,51 @@ tbody tr:hover {
   max-height: 400px;
 }
 
+/* ===== EDITOR DE HORARIO ===== */
+#horarioForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.horario-dia {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+}
+
+.horario-dia h3 {
+  margin-top: 0;
+  color: var(--primary);
+  text-align: center;
+}
+
+.horario-dia-clases {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.fila-horario {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fila-horario input {
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.fila-horario button {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.8rem;
+}
+
 /* ===== TOAST ===== */
 .toast {
   position: fixed;
@@ -320,10 +367,9 @@ footer {
     flex-direction: column;
   }
 
-  th,
-  td {
-    font-size: 0.9rem;
-    padding: 0.6rem;
+  .fila-horario {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   #btnLogout {
