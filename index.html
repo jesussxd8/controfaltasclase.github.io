@@ -6,10 +6,11 @@
   <title>Control de Faltas</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="assets/logo.svg" />
-  <script src="libs/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script type="module" src="script.js" defer></script>
 </head>
+
 <body>
   <!-- Loader -->
   <div id="loader" class="loader">
@@ -19,20 +20,20 @@
   <header>
     <h1>📚 Control de Faltas</h1>
     <div class="header-buttons">
-      <button id="toggleTheme" title="Cambiar tema">🌙</button>
+      <button id="toggleTheme">🌙</button>
       <button id="btnLogout" class="oculto">Cerrar sesión</button>
     </div>
   </header>
 
   <main>
-    <!-- Login -->
+    <!-- LOGIN -->
     <section id="loginSection" class="card centrado">
       <h2>Bienvenido</h2>
-      <p>Inicia sesión con tu cuenta de Google para continuar</p>
+      <p>Inicia sesión con tu cuenta de Google</p>
       <button id="btnLogin" class="btn-primary">Iniciar sesión con Google</button>
     </section>
 
-    <!-- App principal -->
+    <!-- APP -->
     <section id="appSection" class="card oculto">
       <div class="form-control centrado">
         <label for="fechaFalta">Selecciona una fecha:</label>
@@ -42,32 +43,29 @@
       <div id="asignaturasDelDia" class="centrado"></div>
 
       <div class="botonera">
-  <!-- Fila 1: acciones principales -->
-  <div class="botonera-fila">
-    <button id="btnRegistrar" class="btn-primary">Registrar faltas</button>
-    <button id="btnReiniciar" class="btn-secondary">Reiniciar</button>
-  </div>
+        <div class="botonera-fila">
+          <button id="btnRegistrar" class="btn-primary">Registrar faltas</button>
+          <button id="btnReiniciar" class="btn-secondary">Reiniciar</button>
+        </div>
 
-  <!-- Fila 2: exportaciones -->
-  <div class="botonera-fila">
-    <button id="btnExportar" class="btn-accent">📤 Exportar JSON</button>
-    <button id="btnExportarPDF" class="btn-accent">📄 Exportar PDF</button>
-    <button id="btnExportarCSV" class="btn-secondary">📊 Exportar Excel (CSV)</button>
-  </div>
+        <div class="botonera-fila">
+          <button id="btnExportar" class="btn-accent">📤 Exportar JSON</button>
+          <button id="btnExportarPDF" class="btn-accent">📄 Exportar PDF</button>
+          <button id="btnExportarCSV" class="btn-secondary">📊 Exportar CSV</button>
+        </div>
 
-  <!-- Fila 3: importaciones -->
-  <div class="botonera-fila">
-    <label class="custom-file-button">
-      📥 Importar JSON
-      <input type="file" id="inputImportJson" accept=".json" class="hidden-file-input" />
-    </label>
+        <div class="botonera-fila">
+          <label class="custom-file-button">
+            📥 Importar JSON
+            <input type="file" id="inputImportJson" accept=".json" class="hidden-file-input" />
+          </label>
 
-    <label class="custom-file-button">
-      📥 Importar TXT
-      <input type="file" id="inputImportTxt" accept=".txt" class="hidden-file-input" />
-    </label>
-  </div>
-</div>
+          <label class="custom-file-button">
+            📥 Importar TXT
+            <input type="file" id="inputImportTxt" accept=".txt" class="hidden-file-input" />
+          </label>
+        </div>
+      </div>
 
       <h2 class="centrado">Resumen de Faltas</h2>
       <div class="table-container">
@@ -82,8 +80,9 @@
           </thead>
           <tbody id="tablaResumen"></tbody>
         </table>
-        <div id="historialFaltas" class="centrado"></div>
       </div>
+
+      <div id="historialFaltas" class="historial"></div>
 
       <div class="grafico-container">
         <div class="grafico-opciones centrado">

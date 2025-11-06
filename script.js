@@ -13,7 +13,7 @@ import {
   setDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// --- FIREBASE ---
+// --- FIREBASE CONFIG ---
 const firebaseConfig = {
   apiKey: "AIzaSyCw-vPulec3ToBUzSV3N_7M4t4tGyzgAgM",
   authDomain: "controlfaltasclase.firebaseapp.com",
@@ -37,14 +37,7 @@ const horario = {
   Friday: { SRD: 2, ADE: 1, ADD: 3 },
 };
 const maxFaltas = {
-  SRD: 41,
-  SGY: 41,
-  SSG: 22,
-  IMW: 32,
-  ADE: 14,
-  IPW: 21,
-  SOJ: 6,
-  ADD: 41,
+  SRD: 41, SGY: 41, SSG: 22, IMW: 32, ADE: 14, IPW: 21, SOJ: 6, ADD: 41
 };
 
 let faltas = {};
@@ -71,7 +64,7 @@ const toast = document.getElementById("toast");
 const toggleTheme = document.getElementById("toggleTheme");
 const tipoGrafico = document.getElementById("tipoGrafico");
 
-// --- UI ---
+// --- FUNCIONES UI ---
 function showToast(msg, color = "#0d6efd") {
   toast.textContent = msg;
   toast.style.background = color;
@@ -96,10 +89,10 @@ btnLogin.onclick = async () => {
   try {
     showLoader(true);
     await signInWithPopup(auth, provider);
-    showToast("Inicio de sesión exitoso", "#198754");
   } catch (e) {
     console.error("Error al iniciar sesión:", e);
     showToast("Error al iniciar sesión", "red");
+  } finally {
     showLoader(false);
   }
 };
@@ -142,8 +135,14 @@ async function cargarFaltas() {
     showLoader(true);
     const ref = doc(db, "usuarios", currentUser.uid);
     const snap = await getDoc(ref);
-    faltas = snap.exists() ? snap.data().faltas || {} : {};
-    if (!snap.exists()) await setDoc(ref, { faltas }, { merge: true });
+
+    if (!snap.exists()) {
+      await setDoc(ref, { faltas: {} });
+      faltas = {};
+    } else {
+      faltas = snap.data().faltas || {};
+    }
+
     actualizarTabla();
     actualizarGrafico();
   } catch (err) {
@@ -157,7 +156,7 @@ async function cargarFaltas() {
 async function guardarFaltas() {
   try {
     const ref = doc(db, "usuarios", currentUser.uid);
-    await setDoc(ref, { faltas });
+    await setDoc(ref, { faltas }, { merge: true });
     actualizarTabla();
     actualizarGrafico();
     showToast("Datos guardados correctamente", "#198754");
@@ -167,15 +166,14 @@ async function guardarFaltas() {
   }
 }
 
-// --- LÓGICA PRINCIPAL ---
+// --- FUNCIONES PRINCIPALES ---
 function mostrarAsignaturasDelDia() {
   const fecha = fechaFalta.value;
   asignaturasDelDia.innerHTML = "";
   if (!fecha) return;
   const dia = new Date(fecha).toLocaleDateString("en-US", { weekday: "long" });
   const clases = horario[dia];
-  if (!clases)
-    return (asignaturasDelDia.innerHTML = "<p>No hay clases este día.</p>");
+  if (!clases) return (asignaturasDelDia.innerHTML = "<p>No hay clases este día.</p>");
   for (const materia in clases) {
     const horas = clases[materia];
     const label = document.createElement("label");
@@ -189,13 +187,13 @@ async function registrarFaltas() {
   if (!fecha) return showToast("Selecciona una fecha", "red");
   const dia = new Date(fecha).toLocaleDateString("en-US", { weekday: "long" });
   const checks = asignaturasDelDia.querySelectorAll("input[type='checkbox']");
-  checks.forEach((cb) => {
+  checks.forEach(cb => {
     if (cb.checked) {
       const materia = cb.value;
       const horas = horario[dia][materia] || 0;
       if (!faltas[materia]) faltas[materia] = { total: 0, historial: [] };
       faltas[materia].total += horas;
-      faltas[materia].historial.push(fecha);
+      faltas[materia].historial.push(`${fecha} (${horas}h)`);
     }
   });
   await guardarFaltas();
@@ -210,9 +208,7 @@ async function reiniciarFaltas() {
 
 // --- EXPORTAR / IMPORTAR ---
 function exportarFaltas() {
-  const blob = new Blob([JSON.stringify(faltas, null, 2)], {
-    type: "application/json",
-  });
+  const blob = new Blob([JSON.stringify(faltas, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "faltas.json";
@@ -236,15 +232,15 @@ async function importarFaltasTxt(e) {
   const file = e.target.files[0];
   if (!file) return;
   const text = await file.text();
-  text.split(/\r?\n/).forEach((line) => {
-    const [m, v] = line.split(":").map((x) => x.trim());
+  text.split(/\r?\n/).forEach(line => {
+    const [m, v] = line.split(":").map(x => x.trim());
     if (m && !isNaN(v)) faltas[m] = { total: parseInt(v), historial: [] };
   });
   await guardarFaltas();
   showToast("Importación TXT completada");
 }
 
-// --- GRÁFICOS Y TABLAS ---
+// --- TABLA Y GRÁFICO ---
 function actualizarTabla() {
   tablaResumen.innerHTML = "";
   let historialHTML = "<h3>Historial de faltas</h3>";
@@ -254,8 +250,7 @@ function actualizarTabla() {
     const total = datos.total;
     const max = maxFaltas[materia];
     const restantes = Math.max(0, max - total);
-    const sobrepasado =
-      total >= max ? 'style="color:red;font-weight:bold;"' : "";
+    const sobrepasado = total >= max ? 'style="color:red;font-weight:bold;"' : "";
 
     if (total >= max) showToast(`${materia} ha superado el límite`, "red");
     tablaResumen.innerHTML += `
@@ -276,10 +271,8 @@ function actualizarTabla() {
 function actualizarGrafico() {
   const ctx = document.getElementById("graficoFaltas");
   const labels = Object.keys(maxFaltas);
-  const usados = labels.map((m) => faltas[m]?.total || 0);
-  const restantes = labels.map((m) =>
-    Math.max(0, maxFaltas[m] - (faltas[m]?.total || 0))
-  );
+  const usados = labels.map(m => (faltas[m]?.total) || 0);
+  const restantes = labels.map(m => Math.max(0, maxFaltas[m] - (faltas[m]?.total || 0)));
 
   if (chart) chart.destroy();
   chart = new Chart(ctx, {
@@ -288,13 +281,13 @@ function actualizarGrafico() {
       labels,
       datasets: [
         { label: "Usadas", data: usados, backgroundColor: "#0d6efd" },
-        { label: "Restantes", data: restantes, backgroundColor: "#198754" },
-      ],
+        { label: "Restantes", data: restantes, backgroundColor: "#198754" }
+      ]
     },
     options: {
       responsive: true,
       plugins: { legend: { position: "bottom" } },
-    },
+    }
   });
 }
 
