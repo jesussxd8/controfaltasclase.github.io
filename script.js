@@ -86,12 +86,17 @@ btnLogout.onclick = async () => {
 };
 
 onAuthStateChanged(auth, async (user) => {
+  showLoader(true);
   if (user) {
     currentUser = user;
-    mostrarApp();
     await cargarFaltas();
-  } else mostrarLogin();
+    mostrarApp();
+  } else {
+    mostrarLogin();
+  }
+  showLoader(false);
 });
+
 
 // --- MOSTRAR SECCIONES ---
 function mostrarLogin() {
@@ -228,12 +233,15 @@ btnExportarCSV.onclick = () => {
 // --- TABLA Y GRÁFICO ---
 function actualizarTabla() {
   tablaResumen.innerHTML = "";
+  let historialHTML = "<h3>Historial de faltas</h3>";
+
   for (const materia in maxFaltas) {
     const datos = faltas[materia] || { total: 0, historial: [] };
     const total = datos.total;
     const max = maxFaltas[materia];
     const restantes = Math.max(0, max - total);
     const sobrepasado = total >= max ? 'style="color:red;font-weight:bold;"' : "";
+
     if (total >= max) showToast(`${materia} ha superado el límite`, "red");
     tablaResumen.innerHTML += `
       <tr ${sobrepasado}>
@@ -242,8 +250,14 @@ function actualizarTabla() {
         <td>${max}</td>
         <td>${restantes}</td>
       </tr>`;
+
+    if (datos.historial?.length)
+      historialHTML += `<p><b>${materia}:</b> ${datos.historial.join(", ")}</p>`;
   }
+
+  document.getElementById("historialFaltas").innerHTML = historialHTML;
 }
+
 
 function actualizarGrafico() {
   const ctx = document.getElementById("graficoFaltas");
@@ -284,5 +298,7 @@ window.addEventListener("load", () => {
   const savedTheme = localStorage.getItem("theme") || "light";
   document.body.setAttribute("data-theme", savedTheme);
   toggleTheme.textContent = savedTheme === "dark" ? "☀️" : "🌙";
-  setTimeout(() => showLoader(false), 800);
+  // Reducción del tiempo del preloader
+  setTimeout(() => showLoader(false), 300);
 });
+

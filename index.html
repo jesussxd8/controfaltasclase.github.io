@@ -42,22 +42,32 @@
       <div id="asignaturasDelDia" class="centrado"></div>
 
       <div class="botonera">
-        <button id="btnRegistrar" class="btn-primary">Registrar faltas</button>
-        <button id="btnReiniciar" class="btn-secondary">Reiniciar</button>
-        <button id="btnExportar" class="btn-accent">📤 Exportar JSON</button>
-        <button id="btnExportarPDF" class="btn-accent">📄 Exportar PDF</button>
-        <button id="btnExportarCSV" class="btn-secondary">📊 Exportar Excel (CSV)</button>
+  <!-- Fila 1: acciones principales -->
+  <div class="botonera-fila">
+    <button id="btnRegistrar" class="btn-primary">Registrar faltas</button>
+    <button id="btnReiniciar" class="btn-secondary">Reiniciar</button>
+  </div>
 
-        <label class="custom-file-button">
-          📥 Importar JSON
-          <input type="file" id="inputImportJson" accept=".json" class="hidden-file-input" />
-        </label>
+  <!-- Fila 2: exportaciones -->
+  <div class="botonera-fila">
+    <button id="btnExportar" class="btn-accent">📤 Exportar JSON</button>
+    <button id="btnExportarPDF" class="btn-accent">📄 Exportar PDF</button>
+    <button id="btnExportarCSV" class="btn-secondary">📊 Exportar Excel (CSV)</button>
+  </div>
 
-        <label class="custom-file-button">
-          📥 Importar TXT
-          <input type="file" id="inputImportTxt" accept=".txt" class="hidden-file-input" />
-        </label>
-      </div>
+  <!-- Fila 3: importaciones -->
+  <div class="botonera-fila">
+    <label class="custom-file-button">
+      📥 Importar JSON
+      <input type="file" id="inputImportJson" accept=".json" class="hidden-file-input" />
+    </label>
+
+    <label class="custom-file-button">
+      📥 Importar TXT
+      <input type="file" id="inputImportTxt" accept=".txt" class="hidden-file-input" />
+    </label>
+  </div>
+</div>
 
       <h2 class="centrado">Resumen de Faltas</h2>
       <div class="table-container">
@@ -72,6 +82,7 @@
           </thead>
           <tbody id="tablaResumen"></tbody>
         </table>
+        <div id="historialFaltas" class="centrado"></div>
       </div>
 
       <div class="grafico-container">

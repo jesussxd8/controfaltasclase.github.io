@@ -226,3 +226,30 @@ footer {
   table { font-size: 0.85rem; }
   button, .custom-file-button { width: 90%; }
 }
+.botonera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.botonera-fila {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+button, .custom-file-button {
+  min-width: 150px;
+}
+
+@media (max-width: 768px) {
+  .botonera-fila {
+    flex-direction: column;
+  }
+  button, .custom-file-button {
+    width: 90%;
+  }
+}
