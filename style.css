@@ -15,6 +15,7 @@
   --card-bg: #1f1f1f;
 }
 
+/* ====== GLOBAL ====== */
 body {
   font-family: "Inter", sans-serif;
   background-color: var(--bg);
@@ -26,37 +27,53 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
-/* HEADER */
+/* ====== HEADER ====== */
 header {
   background: var(--primary);
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 1rem 1.2rem;
+  flex-wrap: wrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+  font-size: 1.6rem;
+  margin: 0;
 }
 
 .header-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
-#toggleTheme, #btnLogout {
+#toggleTheme,
+#btnLogout {
   background: white;
   border: none;
   color: var(--primary);
-  font-size: 1.1rem;
-  padding: 0.5rem 0.8rem;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: transform 0.2s, background 0.3s;
 }
-#toggleTheme:hover, #btnLogout:hover {
+
+#btnLogout {
+  background: #dc3545;
+  color: white;
+}
+
+#toggleTheme:hover,
+#btnLogout:hover {
   transform: scale(1.05);
 }
 
-/* LOADER */
+/* ====== LOADER ====== */
 .loader {
   position: fixed;
   inset: 0;
@@ -75,10 +92,12 @@ header {
   animation: spin 1s linear infinite;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* MAIN CONTENT */
+/* ====== MAIN ====== */
 main {
   flex: 1;
   display: flex;
@@ -97,23 +116,30 @@ main {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .centrado {
   text-align: center;
 }
 
-/* FORMULARIO Y BOTONES */
+/* ====== FORMULARIO ====== */
 input[type="date"] {
-  padding: 0.5rem;
+  padding: 0.6rem;
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 1rem;
   margin-top: 0.3rem;
 }
 
+/* ====== BOTONES ====== */
 .botonera {
   display: flex;
   flex-direction: column;
@@ -129,9 +155,11 @@ input[type="date"] {
   gap: 0.8rem;
 }
 
-button, .custom-file-button {
-  flex: 1 1 160px;
+button,
+.custom-file-button {
+  flex: 1 1 180px;
   max-width: 220px;
+  min-width: 180px;
   text-align: center;
   border: none;
   border-radius: 8px;
@@ -142,14 +170,24 @@ button, .custom-file-button {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-button:hover, .custom-file-button:hover {
+button:hover,
+.custom-file-button:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.btn-primary { background: var(--primary); color: white; }
-.btn-secondary { background: var(--secondary); color: white; }
-.btn-accent { background: var(--accent); color: white; }
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-secondary {
+  background: var(--secondary);
+  color: white;
+}
+.btn-accent {
+  background: var(--accent);
+  color: white;
+}
 
 .custom-file-button {
   background: var(--accent);
@@ -157,6 +195,7 @@ button:hover, .custom-file-button:hover {
   display: inline-block;
   position: relative;
 }
+
 .hidden-file-input {
   position: absolute;
   opacity: 0;
@@ -167,7 +206,7 @@ button:hover, .custom-file-button:hover {
   cursor: pointer;
 }
 
-/* TABLA */
+/* ====== TABLA ====== */
 .table-container {
   overflow-x: auto;
   margin-top: 1.5rem;
@@ -183,7 +222,8 @@ thead {
   background-color: var(--primary);
   color: white;
 }
-th, td {
+th,
+td {
   padding: 0.8rem 1rem;
   text-align: center;
 }
@@ -194,21 +234,31 @@ tbody tr:hover {
   background: rgba(13, 110, 253, 0.1);
 }
 
-/* HISTORIAL */
+/* ====== HISTORIAL ====== */
 .historial {
   margin-top: 1.5rem;
   background: rgba(0, 0, 0, 0.03);
   padding: 1rem;
   border-radius: 8px;
   font-size: 0.95rem;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 .historial h3 {
-  margin-bottom: 0.8rem;
   text-align: center;
+  margin-bottom: 1rem;
+}
+.historial p {
+  margin: 0.3rem 0;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: rgba(13, 110, 253, 0.05);
+  border-left: 4px solid var(--primary);
+}
+.historial b {
+  color: var(--primary);
 }
 
-/* GRAFICO */
+/* ====== GRAFICO ====== */
 .grafico-container {
   margin-top: 2rem;
   padding: 1rem;
@@ -219,7 +269,7 @@ tbody tr:hover {
   max-height: 400px;
 }
 
-/* TOAST */
+/* ====== TOAST ====== */
 .toast {
   position: fixed;
   bottom: 20px;
@@ -239,7 +289,7 @@ tbody tr:hover {
   bottom: 40px;
 }
 
-/* FOOTER */
+/* ====== FOOTER ====== */
 footer {
   text-align: center;
   padding: 1rem;
@@ -247,30 +297,57 @@ footer {
   opacity: 0.7;
 }
 
-/* RESPONSIVE */
+/* ====== RESPONSIVE ====== */
 @media (max-width: 768px) {
   header {
     flex-direction: column;
+    align-items: center;
     text-align: center;
+    gap: 0.5rem;
   }
+
+  header h1 {
+    font-size: 1.4rem;
+  }
+
+  .header-buttons {
+    justify-content: center;
+  }
+
   .card {
     padding: 1.2rem;
   }
-  button, .custom-file-button {
-    width: 100%;
+
+  button,
+  .custom-file-button {
+    width: 90%;
     max-width: none;
   }
+
   .botonera-fila {
     flex-direction: column;
   }
-  th, td {
+
+  th,
+  td {
     font-size: 0.9rem;
     padding: 0.6rem;
+  }
+
+  #btnLogout {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  h1 { font-size: 1.4rem; }
-  h2 { font-size: 1.2rem; }
-  button { font-size: 0.9rem; padding: 0.7rem; }
+  h1 {
+    font-size: 1.2rem;
+  }
+  h2 {
+    font-size: 1.1rem;
+  }
+  button {
+    font-size: 0.9rem;
+    padding: 0.8rem;
+  }
 }
