@@ -95,20 +95,21 @@
         <canvas id="graficoFaltas"></canvas>
       </div>
     </section>
-
-    <!-- EDITOR DE HORARIO -->
-    <section id="horarioSection" class="card oculto">
-      <h2 class="centrado">🗓️ Editar mi horario y límites de faltas</h2>
-      <p class="centrado">Añade tus asignaturas, horas y define los máximos permitidos.</p>
-
-      <div id="horarioForm"></div>
-
-      <div class="centrado" style="margin-top: 1rem;">
-        <button id="btnGuardarHorario" class="btn-primary">💾 Guardar cambios</button>
-        <button id="btnVolverApp" class="btn-secondary">⬅️ Volver</button>
-      </div>
-    </section>
   </main>
+
+  <!-- MODAL DE HORARIO -->
+  <div id="modalHorario" class="modal oculto">
+    <div class="modal-content">
+      <h2>🗓️ Editar horario y límites</h2>
+      <p>Agrega las asignaturas, horas y límites de faltas por día</p>
+      <div id="horarioTabs" class="tabs"></div>
+      <div id="contenidoHorario"></div>
+      <div class="centrado">
+        <button id="btnGuardarHorario" class="btn-primary">💾 Guardar</button>
+        <button id="btnCerrarModal" class="btn-secondary">❌ Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast"></div>
 
