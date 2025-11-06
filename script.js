@@ -153,10 +153,12 @@ btnEditarHorario.onclick = () => {
   generarTabs();
   renderDia("Monday");
 };
+
 btnCerrarModal.onclick = () => {
   modal.classList.add("oculto");
 };
 
+// Generar pestañas de los días
 function generarTabs() {
   const dias = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   horarioTabs.innerHTML = "";
@@ -173,6 +175,7 @@ function generarTabs() {
   });
 }
 
+// Renderizar el día seleccionado en el modal
 function renderDia(dia) {
   contenidoHorario.innerHTML = "";
   const bloques = horario[dia] || [];
@@ -188,46 +191,79 @@ function renderDia(dia) {
   contenidoHorario.appendChild(btnAdd);
 }
 
+// Crear una fila editable para añadir asignaturas
 function crearFilaHorario(materia = "", hora = "", max = "") {
   const fila = document.createElement("div");
   fila.className = "fila-horario";
   fila.innerHTML = `
     <input type="text" class="materia" placeholder="Asignatura" value="${materia}" />
     <input type="number" class="hora" placeholder="Hora (1-6)" value="${hora}" min="1" max="10" />
-    <input type="number" class="max" placeholder="Límite" value="${max}" min="1" max="100" />
+    <input type="number" class="max" placeholder="Límite de faltas" value="${max}" min="1" max="100" />
     <button class="btn-secondary eliminar">🗑️</button>
   `;
   fila.querySelector(".eliminar").onclick = () => fila.remove();
   return fila;
 }
 
+// GUARDAR HORARIO
 btnGuardarHorario.onclick = async () => {
-  const diaActivo = document.querySelector(".tabs button.active").textContent;
-  const filas = contenidoHorario.querySelectorAll(".fila-horario");
-  const bloques = [];
-  filas.forEach(f => {
-    const materia = f.querySelector(".materia").value.trim();
-    const hora = parseInt(f.querySelector(".hora").value || 0);
-    const max = parseInt(f.querySelector(".max").value || 0);
-    if (materia && hora > 0) bloques.push({ materia, hora, max });
-  });
-  horario[diaActivo] = bloques;
+  try {
+    const diaActivoBtn = document.querySelector(".tabs button.active");
+    if (!diaActivoBtn) {
+      showToast("Selecciona un día antes de guardar", "red");
+      return;
+    }
 
-  // recalcular límites globales
-  maxFaltas = {};
-  Object.values(horario).forEach(bloquesDia => {
-    bloquesDia.forEach(b => {
-      if (!maxFaltas[b.materia] || b.max > maxFaltas[b.materia]) {
-        maxFaltas[b.materia] = b.max;
+    const diaActivo = diaActivoBtn.textContent;
+    const filas = contenidoHorario.querySelectorAll(".fila-horario");
+
+    if (filas.length === 0) {
+      showToast("Agrega al menos una asignatura", "orange");
+      return;
+    }
+
+    const bloques = [];
+    filas.forEach(f => {
+      const materia = f.querySelector(".materia").value.trim();
+      const hora = parseInt(f.querySelector(".hora").value || 0);
+      const max = parseInt(f.querySelector(".max").value || 0);
+      if (materia && hora > 0 && max > 0) {
+        bloques.push({ materia, hora, max });
       }
     });
-  });
 
-  await guardarDatosUsuario();
-  modal.classList.add("oculto");
-  actualizarTabla();
-  actualizarGrafico();
-  showToast("Horario guardado correctamente", "#198754");
+    if (bloques.length === 0) {
+      showToast("Completa correctamente las asignaturas", "orange");
+      return;
+    }
+
+    // Guardamos los bloques del día activo
+    horario[diaActivo] = bloques;
+
+    // Recalcular límites globales
+    maxFaltas = {};
+    Object.values(horario).forEach(bloquesDia => {
+      bloquesDia.forEach(b => {
+        if (!maxFaltas[b.materia] || b.max > maxFaltas[b.materia]) {
+          maxFaltas[b.materia] = b.max;
+        }
+      });
+    });
+
+    // Guardar en Firestore
+    showLoader(true);
+    await guardarDatosUsuario();
+    showLoader(false);
+
+    modal.classList.add("oculto");
+    actualizarTabla();
+    actualizarGrafico();
+    showToast("Horario guardado correctamente", "#198754");
+  } catch (err) {
+    console.error("Error al guardar el horario:", err);
+    showToast("Error al guardar horario", "red");
+    showLoader(false);
+  }
 };
 
 // === REGISTRAR FALTAS ===
